@@ -8,21 +8,21 @@ import 'package:provider/provider.dart';
 
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
-import '../player_progress/player_progress.dart';
+// import '../player_progress/player_progress.dart';
 import '../style/palette.dart';
 import '../style/responsive_screen.dart';
-import 'levels.dart';
+import 'modes.dart';
 
-class LevelSelectionScreen extends StatelessWidget {
-  const LevelSelectionScreen({super.key});
+class ModeSelectionScreen extends StatelessWidget {
+  const ModeSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
-    final playerProgress = context.watch<PlayerProgress>();
+    // final playerProgress = context.watch<PlayerProgress>();
 
     return Scaffold(
-      backgroundColor: palette.backgroundLevelSelection,
+      backgroundColor: palette.backgroundModeSelection,
       body: ResponsiveScreen(
         squarishMainArea: Column(
           children: [
@@ -30,7 +30,7 @@ class LevelSelectionScreen extends StatelessWidget {
               padding: EdgeInsets.all(16),
               child: Center(
                 child: Text(
-                  'Select level',
+                  'Select mode',
                   style:
                       TextStyle(fontFamily: 'Permanent Marker', fontSize: 30),
                 ),
@@ -40,18 +40,19 @@ class LevelSelectionScreen extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  for (final level in gameLevels)
+                  for (final mode in gameModes)
                     ListTile(
-                      enabled: playerProgress.highestLevelReached >=
-                          level.number - 1,
+                      // enabled: playerProgress.highestModeReached >=
+                      //     mode.number - 1,
                       onTap: () {
                         final audioController = context.read<AudioController>();
                         audioController.playSfx(SfxType.buttonTap);
+
                         GoRouter.of(context)
-                            .go('/cpu/othello/${level.number}');
+                            .go('/player/othello/${mode.name}');
                       },
-                      leading: Text(level.number.toString()),
-                      title: Text('Level #${level.number}'),
+                      leading: Text(mode.number.toString()),
+                      title: Text('Mode ${mode.name}'),
                     )
                 ],
               ),

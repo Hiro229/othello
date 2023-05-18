@@ -26,7 +26,8 @@ import 'src/in_app_purchase/in_app_purchase.dart';
 import 'src/level_selection/level_selection_screen.dart';
 import 'src/level_selection/levels.dart';
 import 'src/main_menu/main_menu_screen.dart';
-import 'src/play_session/play_session_screen.dart';
+import 'src/mode_selection/mode_selection_screen.dart';
+import 'src/mode_selection/modes.dart';
 import 'src/player_progress/persistence/local_storage_player_progress_persistence.dart';
 import 'src/player_progress/persistence/player_progress_persistence.dart';
 import 'src/player_progress/player_progress.dart';
@@ -133,29 +134,13 @@ class MyApp extends StatelessWidget {
               const MainMenuScreen(key: Key('main menu')),
           routes: [
             GoRoute(
-                path: 'play',
+                path: 'cpu',
                 pageBuilder: (context, state) => buildMyTransition<void>(
                       child: const LevelSelectionScreen(
                           key: Key('level selection')),
                       color: context.watch<Palette>().backgroundLevelSelection,
                     ),
                 routes: [
-                  GoRoute(
-                    path: 'session/:level',
-                    pageBuilder: (context, state) {
-                      final levelNumber =
-                          int.parse(state.pathParameters['level']!);
-                      final level = gameLevels
-                          .singleWhere((e) => e.number == levelNumber);
-                      return buildMyTransition<void>(
-                        child: PlaySessionScreen(
-                          level,
-                          key: const Key('play session'),
-                        ),
-                        color: context.watch<Palette>().backgroundPlaySession,
-                      );
-                    },
-                  ),
                   GoRoute(
                     path: 'othello/:level',
                     pageBuilder: (context, state) {
@@ -165,8 +150,8 @@ class MyApp extends StatelessWidget {
                           .singleWhere((e) => e.number == levelNumber);
                       return buildMyTransition<void>(
                         child: GameScreen(
-                          level,
-                          key: const Key('play othello'),
+                          level: level,
+                          key: const Key('cpu othello'),
                         ),
                         color: context.watch<Palette>().backgroundPlaySession,
                       );
@@ -189,9 +174,34 @@ class MyApp extends StatelessWidget {
                   )
                 ]),
             GoRoute(
+                path: 'player',
+                pageBuilder: (context, state) => buildMyTransition<void>(
+                  child: const ModeSelectionScreen(
+                      key: Key('mode selection')),
+                  color: context.watch<Palette>().backgroundModeSelection,
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'othello/:mode',
+                    pageBuilder: (context, state) {
+                      final modeName =
+                      state.pathParameters['mode'];
+                      final mode = gameModes
+                          .singleWhere((e) => e.name == modeName);
+                      return buildMyTransition<void>(
+                        child: GameScreen(
+                          mode: mode,
+                          key: const Key('player othello'),
+                        ),
+                        color: context.watch<Palette>().backgroundPlaySession,
+                      );
+                    },
+                  ),
+                ]),
+            GoRoute(
               path: 'settings',
               builder: (context, state) =>
-                  const SettingsScreen(key: Key('settings')),
+              const SettingsScreen(key: Key('settings')),
             ),
           ]),
     ],

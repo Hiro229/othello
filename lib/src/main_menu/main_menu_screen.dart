@@ -47,9 +47,35 @@ class MainMenuScreen extends StatelessWidget {
             FilledButton(
               onPressed: () {
                 audioController.playSfx(SfxType.buttonTap);
-                GoRouter.of(context).go('/play');
+                GoRouter.of(context).go('/cpu');
               },
-              child: const Text('Play'),
+              child: const Text('CPU vs.'),
+            ),
+            _gap,
+            if (gamesServicesController != null) ...[
+              _hideUntilReady(
+                ready: gamesServicesController.signedIn,
+                child: FilledButton(
+                  onPressed: () => gamesServicesController.showAchievements(),
+                  child: const Text('Achievements'),
+                ),
+              ),
+              _gap,
+              _hideUntilReady(
+                ready: gamesServicesController.signedIn,
+                child: FilledButton(
+                  onPressed: () => gamesServicesController.showLeaderboard(),
+                  child: const Text('Leaderboard'),
+                ),
+              ),
+              _gap,
+            ],
+            FilledButton(
+              onPressed: () {
+                audioController.playSfx(SfxType.buttonTap);
+                GoRouter.of(context).go('/player');
+              },
+              child: const Text('Player vs.'),
             ),
             _gap,
             if (gamesServicesController != null) ...[

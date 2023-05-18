@@ -2,9 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:logging/logging.dart' hide Level;
-import 'package:provider/provider.dart';
+// import 'package:logging/logging.dart' hide Level;
 
 import 'othello_ai.dart';
 import 'othello_board.dart';
@@ -13,20 +11,24 @@ import 'othello_piece.dart';
 import 'othello_rule.dart';
 import 'othello_board_widget.dart';
 import '../level_selection/levels.dart';
+import '../mode_selection/modes.dart';
 
 // ゲーム画面を表すウィジェット
 class GameScreen extends StatefulWidget {
   // レベルの情報を受け取るパラメータを追加します
-  final GameLevel level;
+  final GameLevel? level;
 
-  const GameScreen(this.level, {super.key});
+  final GameMode? mode;
+
+  const GameScreen({this.level, this.mode, super.key}):
+        assert(level != null || mode != null), assert(level == null || mode == null);
 
   @override
   _GameScreenState createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  static final _log = Logger('GameScreen');
+
   // 盤面
   late OthelloBoard board;
 
@@ -37,7 +39,10 @@ class _GameScreenState extends State<GameScreen> {
   late OthelloPlayer player1;
 
   // プレイヤー2（黒）
-  late OthelloAI player2;
+  late OthelloPlayer player2;
+
+  // CPU
+  late OthelloAI ai;
 
   // 手番
   late Color turn;
@@ -136,9 +141,17 @@ class _GameScreenState extends State<GameScreen> {
     // 盤面とプレイヤーの得点を初期化する
     board = OthelloBoard();
     rule = OthelloRule(board);
-    player1 = OthelloPlayer(Colors.white, 'あなた');
+    String player1_name = 'あなた';
     // ルートからレベルの値を取得する
-    player2 = OthelloAI(Colors.black, 'AI', widget.level.number);
+    if (widget.level != null) {
+      player2 = OthelloAI(Colors.black, 'AI', widget.level!.number);
+    } else if (widget.mode != null) {
+      player2 = OthelloPlayer(Colors.black, 'Player2');
+      player1_name = 'Player1';
+    } else {
+      throw Exception('Invalid game mode');
+    }
+    player1 = OthelloPlayer(Colors.white, player1_name);
     player1.updateScore(board);
     player2.updateScore(board);
     // 手番を白に設定する
@@ -175,12 +188,11 @@ class _GameScreenState extends State<GameScreen> {
           // 相手のターンになることを２秒間表示する
           showTurnMessage();
         }
-
       }
       // 画面を更新する
       setState(() {});
       // AIの手番の場合はAIの処理を行う
-      if (turn == Colors.black && !isGameOver) {
+      if (turn == Colors.black && !isGameOver && player2 is OthelloAI) { // player2がOthelloAIであるかどうかチェックする
         aiTurn();
       }
     }
@@ -191,7 +203,7 @@ class _GameScreenState extends State<GameScreen> {
     // 少し遅延させることで、AIが考えているように見せる
     await Future.delayed(Duration(seconds: 1));
     // AIが駒を置く場所を決める
-    OthelloPiece? piece = player2.decidePlace(board, rule);
+    OthelloPiece? piece = (player2 as OthelloAI).decidePlace(board, rule); // player2をOthelloAIにキャストする
     // 修正箇所：pieceがnullの場合は勝敗判定を行う
     if (piece == null) {
       // ゲーム終了フラグをtrueに設定する
